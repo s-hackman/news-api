@@ -52,7 +52,7 @@ describe("GET /api/topics", () => {
 });
 
 describe("GET /api/blah", () => {
-  it("responds with status 400 for bad path message", () => {
+  it("responds with status 404 for route that does not exist", () => {
     return request(app)
       .get("/api/blah")
       .expect(404)
@@ -138,15 +138,127 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/100000")
       .expect(404)
       .then(({ body }) => {
-        expect(body.message).toBe("article not found");
+        expect(body.message).toBe("Article not found");
       });
   });
   it("responds with status 400 for invalid non numeric id", () => {
     return request(app)
-      .get("/api/articles/banana")
+      .get("/api/articles/blah")
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("invalid id");
+        expect(body.message).toBe("Bad Request");
+      });
+  });
+});
+
+describe("GET /api/articles/:article_id/comments", () => {
+  it("responds with comments array, correct length and status 200", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comments).toBeInstanceOf(Array);
+        expect(body.comments.length).toBe(11);
+      });
+  });
+  it("responds with status 200 and message for no comments", () => {
+    return request(app)
+      .get("/api/articles/2/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comments.length).toBe(0);
+      });
+  });
+  it("responds with status 200 and array contains comment objects with correct properties", () => {
+    return request(app)
+      .get("/api/articles/1/comments")
+      .expect(200)
+      .then(({ body }) => {
+        body.comments.forEach((comment) => {
+          expect(typeof comment.comment_id).toBe("number");
+          expect(typeof comment.votes).toBe("number");
+          expect(typeof comment.created_at).toBe("string");
+          expect(typeof comment.author).toBe("string");
+          expect(typeof comment.body).toBe("string");
+        });
+      });
+  });
+  it("responds with status 400 for invalid non numeric id", () => {
+    return request(app)
+      .get("/api/articles/blah/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request");
+      });
+  });
+  it("responds with status 404 if no article found with requested article_id", () => {
+    return request(app)
+      .get("/api/articles/5000/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Article not found");
+      });
+  });
+});
+
+describe("POST /api/articles/:article_id/comments", () => {
+  it("responds with status 201 and returns posted comment", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({ username: "butter_bridge", body: "New comment" })
+      .expect(201)
+      .then(({ body }) => {
+        const expectedCommentResponse = body["comment added"];
+        expect(typeof expectedCommentResponse.comment_id).toBe("number");
+        expect(typeof expectedCommentResponse.votes).toBe("number");
+        expect(typeof expectedCommentResponse.created_at).toBe("string");
+        expect(typeof expectedCommentResponse.author).toBe("string");
+        expect(expectedCommentResponse.body).toBe("New comment");
+      });
+  });
+  it("responds with status 400 for invalid non numeric id", () => {
+    return request(app)
+      .post("/api/articles/blah/comments")
+      .send({ username: "butter_bridge", body: "New comment" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request");
+      });
+  });
+  it("responds with status 400 for missing required field: username", () => {
+    return request(app)
+      .post("/api/articles/4/comments")
+      .send({ body: "New comment" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request");
+      });
+  });
+  it("responds with status 400 for missing required field: body", () => {
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send({ username: "butter_bridge" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request");
+      });
+  });
+  it("responds with status 400 for username not found", () => {
+    return request(app)
+      .post("/api/articles/2/comments")
+      .send({ username: "blah", body: "New comment" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request");
+      });
+  });
+  it("responds with status 400 for invalid username", () => {
+    return request(app)
+      .post("/api/articles/3/comments")
+      .send({ username: 123, body: "New comment" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request");
       });
   });
 });

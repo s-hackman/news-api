@@ -4,11 +4,19 @@ app.use(express.json());
 
 const port = 9090;
 
-const { getTopics, getArticles, getArticleById } = require("./controllers");
+const {
+  getTopics,
+  getArticles,
+  getArticleById,
+  getComments,
+  postComments,
+} = require("./controllers");
 
 app.get("/api/topics", getTopics);
 app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id", getArticleById);
+app.get("/api/articles/:article_id/comments", getComments);
+app.post("/api/articles/:article_id/comments", postComments);
 
 app.use((err, req, res, next) => {
   if (err.status && err.msg) {
