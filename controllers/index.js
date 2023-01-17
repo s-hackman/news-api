@@ -4,6 +4,7 @@ const {
   fetchArticleById,
   fetchComments,
   addComment,
+  updateVotes,
 } = require("../models/index");
 
 exports.getTopics = (req, res, next) => {
@@ -65,6 +66,19 @@ exports.postComments = (req, res, next) => {
   ])
     .then(([newComment, result2]) => {
       res.status(201).send({ "comment added": newComment });
+    })
+    .catch(next);
+};
+
+exports.patchArticle = (req, res, next) => {
+  const { article_id } = req.params;
+  const inc_votes = req.body.inc_votes;
+  Promise.all([
+    updateVotes(article_id, inc_votes),
+    fetchArticleById(article_id),
+  ])
+    .then(([article, result2]) => {
+      res.status(200).send({ article });
     })
     .catch(next);
 };

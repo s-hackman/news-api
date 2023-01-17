@@ -56,3 +56,14 @@ exports.addComment = (id, author, body) => {
       return rows[0];
     });
 };
+
+exports.updateVotes = (id, votes) => {
+  return db
+    .query(
+      `UPDATE articles SET votes = votes + $2 WHERE article_id = $1 RETURNING *;`,
+      [id, +votes]
+    )
+    .then(({ rows }) => {
+      return rows[0];
+    });
+};
