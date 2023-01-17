@@ -262,3 +262,76 @@ describe("POST /api/articles/:article_id/comments", () => {
       });
   });
 });
+
+describe("PATCH /api/articles/:article_id", () => {
+  it("responds with status 200 and the article", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({ inc_votes: 0 })
+      .expect(200)
+      .then(({ body }) => {
+        const article = body.article;
+        expect(article.author).toEqual("butter_bridge");
+        expect(article.title).toEqual("Living in the shadow of a great man");
+        expect(body.article.article_id).toEqual(1);
+        expect(article.body).toEqual("I find this existence challenging");
+        expect(article.topic).toEqual("mitch");
+        expect(article.created_at).toEqual("2020-07-09T20:11:00.000Z");
+        expect(article.votes).toEqual(100);
+      });
+  });
+  it("respond with 200 status code and updates the articles vote and increases it", () => {
+    return request(app)
+      .patch("/api/articles/2")
+      .send({ inc_votes: 100 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article.votes).toEqual(100);
+      });
+  });
+  it("respond with 200 status code and updates the articles vote and decreases it", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({ inc_votes: -5 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article.votes).toEqual(95);
+      });
+  });
+  it("respond with 400 status code and responds with bad request for non numeric inc_votes", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({ inc_votes: "blah" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request");
+      });
+  });
+  it("responds with 404 status code for non existent article", () => {
+    return request(app)
+      .patch("/api/articles/5000")
+      .send({ inc_votes: 100 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Article not found");
+      });
+  });
+  it("responds with status 400 for bad request: body doesnt have inc_votes property", () => {
+    return request(app)
+      .patch("/api/articles/5000")
+      .send({ blah: 100 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request");
+      });
+  });
+  it("responds with status 400 for invalid non numeric id", () => {
+    return request(app)
+      .patch("/api/articles/blah")
+      .send({ inc_votes: 10 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request");
+      });
+  });
+});
