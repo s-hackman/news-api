@@ -12,6 +12,7 @@ const {
   postComments,
   patchArticle,
   getUsers,
+  deleteComment,
 } = require("./controllers");
 
 app.get("/api/topics", getTopics);
@@ -21,6 +22,7 @@ app.get("/api/articles/:article_id/comments", getComments);
 app.post("/api/articles/:article_id/comments", postComments);
 app.patch("/api/articles/:article_id", patchArticle);
 app.get("/api/users", getUsers);
+app.delete("/api/comments/:comment_id", deleteComment);
 
 app.use((err, req, res, next) => {
   if (err.status && err.msg) {
