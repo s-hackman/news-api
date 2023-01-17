@@ -4,15 +4,38 @@ exports.fetchTopics = () => {
   return db.query("SELECT * FROM topics;");
 };
 
-exports.fetchArticles = () => {
-  return db.query(
-    `SELECT articles.article_id, articles.author, articles.title, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id) AS comment_count
-  FROM articles
-  LEFT OUTER JOIN comments
-  ON articles.article_id = comments.article_id
-  GROUP BY articles.article_id
-  ORDER BY articles.created_at DESC;`
-  );
+exports.fetchArticles = (topic, sort_by, order) => {
+  if (
+    !["asc", "desc"].includes(order) ||
+    ![
+      "title",
+      "created_at",
+      "votes",
+      "article_id",
+      "comment_count",
+      "body",
+      "author",
+      "topic",
+    ].includes(sort_by)
+  ) {
+    return Promise.reject({ status: 400, msg: "Invalid sort query" });
+  } else {
+    let filterTopic = "";
+    let arrayTopic = [];
+    if (topic) {
+      filterTopic = ` WHERE topic = $1 `;
+      arrayTopic.push(topic);
+    }
+    return db.query(
+      `SELECT articles.article_id, articles.author, articles.title, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id) AS comment_count
+    FROM articles
+    LEFT OUTER JOIN comments
+    ON articles.article_id = comments.article_id ${filterTopic}
+    GROUP BY articles.article_id
+    ORDER BY ${sort_by} ${order};`,
+      arrayTopic
+    );
+  }
 };
 
 exports.fetchArticleById = (id) => {
