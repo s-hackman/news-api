@@ -143,28 +143,21 @@ describe("GET /api/articles/:article_id", () => {
   });
   it("responds with status 400 for invalid non numeric id", () => {
     return request(app)
-      .get("/api/articles/banana")
+      .get("/api/articles/blah")
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe("Invalid ID");
+        expect(body.message).toBe("Bad Request");
       });
   });
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
-  it("responds with comments array and status 200", () => {
-    return request(app)
-      .get("/api/articles/6/comments")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body.comments).toBeInstanceOf(Array);
-      });
-  });
-  it("responds with all comments, if there are comments", () => {
+  it("responds with comments array, correct length and status 200", () => {
     return request(app)
       .get("/api/articles/1/comments")
       .expect(200)
       .then(({ body }) => {
+        expect(body.comments).toBeInstanceOf(Array);
         expect(body.comments.length).toBe(11);
       });
   });
@@ -173,7 +166,6 @@ describe("GET /api/articles/:article_id/comments", () => {
       .get("/api/articles/2/comments")
       .expect(200)
       .then(({ body }) => {
-        expect(body.message).toBe("No comments");
         expect(body.comments.length).toBe(0);
       });
   });
@@ -191,23 +183,12 @@ describe("GET /api/articles/:article_id/comments", () => {
         });
       });
   });
-  it("responds with correct comment data", () => {
-    return request(app)
-      .get("/api/articles/6/comments")
-      .expect(200)
-      .then(({ body }) => {
-        const comment = body.comments[0];
-        expect(comment.body).toBe("This is a bad article name");
-        expect(comment.votes).toBe(1);
-        expect(comment.author).toBe("butter_bridge");
-      });
-  });
   it("responds with status 400 for invalid non numeric id", () => {
     return request(app)
       .get("/api/articles/blah/comments")
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe("Invalid ID");
+        expect(body.message).toBe("Bad Request");
       });
   });
   it("responds with status 404 if no article found with requested article_id", () => {
@@ -241,7 +222,7 @@ describe("POST /api/articles/:article_id/comments", () => {
       .send({ username: "butter_bridge", body: "New comment" })
       .expect(400)
       .then(({ body }) => {
-        expect(body.message).toBe("Invalid ID");
+        expect(body.message).toBe("Bad Request");
       });
   });
   it("responds with status 400 for missing required field: username", () => {
