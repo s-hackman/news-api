@@ -21,11 +21,15 @@ exports.getTopics = (req, res, next) => {
 };
 
 exports.getArticles = (req, res, next) => {
-  fetchArticles()
+  const topic = req.query.topic;
+  const sort_by = req.query.sort_by || "created_at";
+  const order = req.query.order || "desc";
+
+  fetchArticles(topic, sort_by, order)
     .then(({ rows }) => {
-      let message = "here are the articles";
+      let message = "Here are the Articles";
       if (rows.length === 0) {
-        res.status(404).send({ message: "Article not found" });
+        res.status(200).send({ message: "Articles not found", articles: [] });
       } else {
         let articles = rows;
         articles.forEach((article) => {
