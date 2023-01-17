@@ -5,6 +5,7 @@ const {
   fetchComments,
   addComment,
   updateVotes,
+  fetchUsers,
 } = require("../models/index");
 
 exports.getTopics = (req, res, next) => {
@@ -79,6 +80,14 @@ exports.patchArticle = (req, res, next) => {
   ])
     .then(([article, result2]) => {
       res.status(200).send({ article });
+    })
+    .catch(next);
+};
+
+exports.getUsers = (req, res, next) => {
+  fetchUsers()
+    .then((users) => {
+      res.status(200).send({ users });
     })
     .catch(next);
 };
