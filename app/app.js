@@ -1,28 +1,11 @@
 const express = require("express");
 const app = express();
+const apiRouter = require("./router/apiRouter");
 app.use(express.json());
 
 const port = 9090;
 
-const {
-  getTopics,
-  getArticles,
-  getArticleById,
-  getComments,
-  postComments,
-  patchArticle,
-  getUsers,
-  deleteComment,
-} = require("./controllers");
-
-app.get("/api/topics", getTopics);
-app.get("/api/articles", getArticles);
-app.get("/api/articles/:article_id", getArticleById);
-app.get("/api/articles/:article_id/comments", getComments);
-app.post("/api/articles/:article_id/comments", postComments);
-app.patch("/api/articles/:article_id", patchArticle);
-app.get("/api/users", getUsers);
-app.delete("/api/comments/:comment_id", deleteComment);
+app.use("/api", apiRouter);
 
 app.use((err, req, res, next) => {
   if (err.status && err.msg) {
@@ -59,4 +42,5 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
   console.log(`Listening at port ${port}`);
 });
+
 module.exports = app;

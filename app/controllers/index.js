@@ -9,6 +9,8 @@ const {
   removeComment,
 } = require("../models/index");
 
+const endpoints = require("../../endpoints.json");
+
 exports.getTopics = (req, res, next) => {
   fetchTopics()
     .then(({ rows }) => {
@@ -104,4 +106,8 @@ exports.deleteComment = (req, res, next) => {
       res.status(204).send();
     })
     .catch(next);
+};
+
+exports.getEndpoints = (req, res) => {
+  res.status(200).send({ endpoints });
 };
