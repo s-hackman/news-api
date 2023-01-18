@@ -2,7 +2,7 @@ const testData = require("../db/data/test-data");
 const request = require("supertest");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
-const app = require("../app");
+const app = require("../app/app");
 
 afterAll(() => db.end());
 beforeEach(() => seed(testData));
@@ -555,6 +555,43 @@ describe("DELETE /api/comments/:comment_id", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.message).toBe("Comment not found");
+      });
+  });
+});
+
+describe("GET /api", () => {
+  it("respond with status 200 and all possible endpoints", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then(({ body }) => {
+        const { endpoints } = body;
+        expect(Object.keys(endpoints)).toEqual(
+          expect.arrayContaining([
+            "GET /api",
+            "GET /api/topics",
+            "GET /api/articles",
+            "POST /api/articles/:article_id/comments",
+            "GET /api/users",
+            "GET /api/articles/:article_id",
+            "PATCH /api/articles/article_id",
+            "GET /api/articles/:article_id/comments",
+            "DELETE /api/comments/:comment_id",
+          ])
+        );
+      });
+  });
+  it("respond with status 200 and also provides description of each endpoints", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then(({ body }) => {
+        const { endpoints } = body;
+        for (endpoint in endpoints) {
+          const endpointInfo = endpoints[endpoint];
+          expect(endpointInfo).toHaveProperty("description");
+          expect(typeof endpointInfo.description).toBe("string");
+        }
       });
   });
 });
