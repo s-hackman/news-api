@@ -2,8 +2,6 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 
-const port = 9090;
-
 const {
   getTopics,
   getArticles,
@@ -56,7 +54,4 @@ app.use((err, req, res, next) => {
   res.status(500).send({ message: "Internal Server Error" });
 });
 
-app.listen(port, () => {
-  console.log(`Listening at port ${port}`);
-});
 module.exports = app;
