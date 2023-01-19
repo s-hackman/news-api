@@ -7,6 +7,7 @@ const {
   updateVotes,
   fetchUsers,
   removeComment,
+  fetchUserByUsername,
 } = require("../models/index");
 
 const endpoints = require("../../endpoints.json");
@@ -110,4 +111,13 @@ exports.deleteComment = (req, res, next) => {
 
 exports.getEndpoints = (req, res) => {
   res.status(200).send({ endpoints });
+};
+
+exports.getUserByUsername = (req, res, next) => {
+  const { username } = req.params;
+  fetchUserByUsername(username)
+    .then((user) => {
+      res.status(200).send({ user });
+    })
+    .catch(next);
 };
