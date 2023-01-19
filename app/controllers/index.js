@@ -8,6 +8,7 @@ const {
   fetchUsers,
   removeComment,
   fetchUserByUsername,
+  updateCommentVotes,
 } = require("../models/index");
 
 const endpoints = require("../../endpoints.json");
@@ -118,6 +119,16 @@ exports.getUserByUsername = (req, res, next) => {
   fetchUserByUsername(username)
     .then((user) => {
       res.status(200).send({ user });
+    })
+    .catch(next);
+};
+
+exports.patchComment = (req, res, next) => {
+  const { comment_id } = req.params;
+  const inc_votes = req.body.inc_votes;
+  updateCommentVotes(comment_id, inc_votes)
+    .then((comment) => {
+      res.status(200).send({ comment });
     })
     .catch(next);
 };
