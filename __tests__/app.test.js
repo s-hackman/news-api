@@ -620,3 +620,92 @@ describe("GET /api/users/:username", () => {
       });
   });
 });
+
+describe("PATCH /api/comments/:comment_id", () => {
+  it("responds with status 200 and comment object with correct properties", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({ inc_votes: 10 })
+      .expect(200)
+      .then(({ body }) => {
+        const comment = body.comment;
+        expect(typeof comment.comment_id).toBe("number");
+        expect(typeof comment.article_id).toBe("number");
+        expect(typeof comment.votes).toBe("number");
+        expect(typeof comment.created_at).toBe("string");
+        expect(typeof comment.author).toBe("string");
+        expect(typeof comment.body).toBe("string");
+      });
+  });
+  it("responds with status 200 and the comment", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({ inc_votes: 20 })
+      .expect(200)
+      .then(({ body }) => {
+        const comment = body.comment;
+        expect(comment.comment_id).toEqual(1);
+        expect(comment.article_id).toEqual(9);
+        expect(comment.votes).toEqual(36);
+        expect(comment.created_at).toEqual("2020-04-06T12:17:00.000Z");
+        expect(comment.author).toEqual("butter_bridge");
+        expect(comment.body).toEqual(
+          "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!"
+        );
+      });
+  });
+  it("respond with 200 status code and updates the comment vote and increases it", () => {
+    return request(app)
+      .patch("/api/comments/2")
+      .send({ inc_votes: 100 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comment.votes).toEqual(114);
+      });
+  });
+  it("respond with 200 status code and updates the comment vote and decreases it", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({ inc_votes: -5 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comment.votes).toEqual(11);
+      });
+  });
+  it("respond with 400 status code and responds with bad request for non numeric inc_votes", () => {
+    return request(app)
+      .patch("/api/comments/1")
+      .send({ inc_votes: "blah" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request");
+      });
+  });
+  it("responds with 404 status code for non existent comment", () => {
+    return request(app)
+      .patch("/api/comments/5000")
+      .send({ inc_votes: 100 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Comment not found");
+      });
+  });
+  it("responds with status 400 for bad request: body doesnt have inc_votes property", () => {
+    return request(app)
+      .patch("/api/comments/2")
+      .send({ blah: 100 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request");
+      });
+  });
+  it("responds with status 400 for invalid non numeric id", () => {
+    return request(app)
+      .patch("/api/comments/blah")
+      .send({ inc_votes: 10 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request");
+      });
+  });
+});

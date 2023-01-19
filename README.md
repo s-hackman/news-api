@@ -8,7 +8,7 @@ A hosted version of this project can be found [here](https://shisho-news-api.onr
 
 ### Prerequisites
 
-This project requires [npm](https://www.npmjs.com/get-npm) (v19.1.0 or newer), [PostgreSQL](https://www.postgresql.org/) (v12.12 or newer) to run. Install if necessary.
+This project requires [npm](https://www.npmjs.com/get-npm) (v19.1.0 or newer), [PostgreSQL](https://www.postgresql.org/) (v8.7.3 or newer) to run. Install if necessary.
 
 ## Step 1 - Setting up your own repository
 

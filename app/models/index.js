@@ -20,17 +20,17 @@ exports.fetchArticles = (topic, sort_by, order) => {
   ) {
     return Promise.reject({ status: 400, msg: "Invalid sort query" });
   } else {
-    let filterTopic = "";
+    let whereClause = "";
     let arrayTopic = [];
     if (topic) {
-      filterTopic = ` WHERE topic = $1 `;
+      whereClause = ` WHERE topic = $1 `;
       arrayTopic.push(topic);
     }
     return db.query(
       `SELECT articles.article_id, articles.author, articles.title, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id) AS comment_count
     FROM articles
     LEFT OUTER JOIN comments
-    ON articles.article_id = comments.article_id ${filterTopic}
+    ON articles.article_id = comments.article_id ${whereClause}
     GROUP BY articles.article_id
     ORDER BY ${sort_by} ${order};`,
       arrayTopic
@@ -124,5 +124,23 @@ exports.fetchUserByUsername = (username) => {
         });
       }
       return user;
+    });
+};
+
+exports.updateCommentVotes = (id, votes) => {
+  return db
+    .query(
+      `UPDATE comments SET votes = votes + $2 WHERE comment_id = $1 RETURNING *;`,
+      [id, votes]
+    )
+    .then(({ rows }) => {
+      const comment = rows[0];
+      if (!comment) {
+        return Promise.reject({
+          status: 404,
+          msg: "Comment not found",
+        });
+      }
+      return comment;
     });
 };
