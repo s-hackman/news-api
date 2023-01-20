@@ -40,7 +40,7 @@ jobs:
       - name: Use PostgreSQL
         uses: harmon758/postgresql-action@v1
         with:
-          postgresql db: "my_db"
+          postgresql db: "nc_news"
           postgresql user: "test_user"
           postgresql password: "test_password"
 
@@ -48,4 +48,4 @@ jobs:
         run: npm i
 
       - name: Run tests
-        run: PGDATABASE=my_db PGUSER=test_user PGPASSWORD=test_password npm t
+        run: PGDATABASE=nc_news PGUSER=test_user PGPASSWORD=test_password npm t

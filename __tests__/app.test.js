@@ -776,7 +776,7 @@ describe("POST /api/topics", () => {
 
 describe("DELETE /api/articles/:article_id", () => {
   it("responds with a status of 204 when deleted", () => {
-    return request(app).delete("/api/articles/2").expect(204);
+    return request(app).delete("/api/articles/1").expect(204);
   });
   it("responds with a status of 404 when id not found with a message ", () => {
     return request(app)
