@@ -9,6 +9,7 @@ const {
   removeComment,
   fetchUserByUsername,
   updateCommentVotes,
+  addArticle,
 } = require("../models/index");
 
 const endpoints = require("../../endpoints.json");
@@ -29,8 +30,10 @@ exports.getArticles = (req, res, next) => {
   const topic = req.query.topic;
   const sort_by = req.query.sort_by || "created_at";
   const order = req.query.order || "desc";
+  const limit = req.query.limit || 10;
+  const p = req.query.p || 1;
 
-  fetchArticles(topic, sort_by, order)
+  fetchArticles(topic, sort_by, order, limit, p)
     .then(({ rows }) => {
       let message = "Here are the Articles";
       if (rows.length === 0) {
@@ -129,6 +132,17 @@ exports.patchComment = (req, res, next) => {
   updateCommentVotes(comment_id, inc_votes)
     .then((comment) => {
       res.status(200).send({ comment });
+    })
+    .catch(next);
+};
+
+exports.postArticle = (req, res, next) => {
+  const { author, title, body, topic, article_img_url } = req.body;
+  addArticle(author, title, body, topic, article_img_url)
+    .then(({ rows }) => {
+      const article = rows[0];
+      article.comment_count = 0;
+      res.status(201).send({ article });
     })
     .catch(next);
 };

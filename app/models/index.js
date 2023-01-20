@@ -4,7 +4,7 @@ exports.fetchTopics = () => {
   return db.query("SELECT * FROM topics;");
 };
 
-exports.fetchArticles = (topic, sort_by, order) => {
+exports.fetchArticles = (topic, sort_by, order, limit, p) => {
   if (
     !["asc", "desc"].includes(order) ||
     ![
@@ -21,19 +21,20 @@ exports.fetchArticles = (topic, sort_by, order) => {
     return Promise.reject({ status: 400, msg: "Invalid sort query" });
   } else {
     let whereClause = "";
-    let arrayTopic = [];
+    let arraySQL = [limit, (p - 1) * limit];
     if (topic) {
-      whereClause = ` WHERE topic = $1 `;
-      arrayTopic.push(topic);
+      whereClause = ` WHERE topic = $3 `;
+      arraySQL.push(topic);
     }
     return db.query(
       `SELECT articles.article_id, articles.author, articles.title, articles.topic, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id) AS comment_count
-    FROM articles
-    LEFT OUTER JOIN comments
-    ON articles.article_id = comments.article_id ${whereClause}
-    GROUP BY articles.article_id
-    ORDER BY ${sort_by} ${order};`,
-      arrayTopic
+      FROM articles
+      LEFT OUTER JOIN comments
+      ON articles.article_id = comments.article_id ${whereClause}
+      GROUP BY articles.article_id
+      ORDER BY ${sort_by} ${order}
+      LIMIT $1 OFFSET $2;`,
+      arraySQL
     );
   }
 };
@@ -143,4 +144,20 @@ exports.updateCommentVotes = (id, votes) => {
       }
       return comment;
     });
+};
+
+exports.addArticle = (author, title, body, topic, article_img_url) => {
+  if (!article_img_url) {
+    return db.query(
+      `INSERT INTO articles (author, title, body, topic)
+      VALUES ($1, $2, $3, $4) RETURNING *;`,
+      [author, title, body, topic]
+    );
+  } else {
+    return db.query(
+      `INSERT INTO articles (author, title, body, topic, article_img_url)
+      VALUES ($1, $2, $3, $4, $5) RETURNING *;`,
+      [author, title, body, topic, article_img_url]
+    );
+  }
 };
