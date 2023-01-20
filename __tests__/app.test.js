@@ -73,10 +73,18 @@ describe("GET /api/articles", () => {
   });
   it("responds with all articles in database", () => {
     return request(app)
-      .get("/api/articles")
+      .get("/api/articles?limit=500")
       .expect(200)
       .then(({ body }) => {
         expect(body.articles.length).toBe(12);
+      });
+  });
+  it("responds with articles in database with limit of 3", () => {
+    return request(app)
+      .get("/api/articles?limit=3")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.articles.length).toBe(3);
       });
   });
   it("responds with array containing article objects with correct properties", () => {
@@ -503,9 +511,9 @@ describe("GET /api/articles queries", () => {
     });
   });
   describe("GET /api/articles filters by topics query", () => {
-    it("responds with status 200 and filter results by topic mitch", () => {
+    it("responds with status 200 and filter results by topic mitch and limit set to 100", () => {
       return request(app)
-        .get("/api/articles?topic=mitch")
+        .get("/api/articles?topic=mitch&limit=100")
         .expect(200)
         .then(({ body }) => {
           body.articles.forEach((article) => {
@@ -703,6 +711,50 @@ describe("PATCH /api/comments/:comment_id", () => {
     return request(app)
       .patch("/api/comments/blah")
       .send({ inc_votes: 10 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request");
+      });
+  });
+});
+
+describe("POST /api/articles", () => {
+  it("responds with status 201 and returns posted article", () => {
+    return request(app)
+      .post("/api/articles")
+      .send({
+        title: "test_article",
+        body: "blah blah blah",
+        topic: "mitch",
+        author: "butter_bridge",
+      })
+      .expect(201)
+      .then(({ body }) => {
+        const article = body.article;
+        expect(typeof article.article_id).toBe("number");
+        expect(typeof article.votes).toBe("number");
+        expect(typeof article.created_at).toBe("string");
+        expect(typeof article.comment_count).toBe("number");
+        expect(typeof article.body).toBe("string");
+        expect(article.article_id).toBe(13);
+        expect(article.body).toBe("blah blah blah");
+        expect(article.comment_count).toBe(0);
+        expect(article.votes).toBe(0);
+      });
+  });
+  it("responds with status 400 for missing required field: title", () => {
+    return request(app)
+      .post("/api/articles")
+      .send({ body: "blah blah blah", topic: "mitch", author: "butter_bridge" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request");
+      });
+  });
+  it("responds with status 400 for missing required field: body", () => {
+    return request(app)
+      .post("/api/articles")
+      .send({ title: "test_article", topic: "mitch", author: "butter_bridge" })
       .expect(400)
       .then(({ body }) => {
         expect(body.message).toBe("Bad Request");
