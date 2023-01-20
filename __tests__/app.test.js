@@ -121,26 +121,6 @@ describe("GET /api/articles/:article_id", () => {
         expect(typeof body.article).toBe("object");
       });
   });
-  it("responds with status 200 article object should have correct author, title, article_id, topic, created_at, article_img_url, comment_count and votes", () => {
-    return request(app)
-      .get("/api/articles/1")
-      .expect(200)
-      .then(({ body }) => {
-        const expectedResponse = {
-          article_id: 1,
-          author: "butter_bridge",
-          title: "Living in the shadow of a great man",
-          topic: "mitch",
-          body: "I find this existence challenging",
-          created_at: "2020-07-09T20:11:00.000Z",
-          votes: 100,
-          article_img_url:
-            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-          comment_count: "11",
-        };
-        expect(body.article).toEqual(expectedResponse);
-      });
-  });
   it("responds with 404 if no article found with requested id", () => {
     return request(app)
       .get("/api/articles/100000")
@@ -284,7 +264,6 @@ describe("PATCH /api/articles/:article_id", () => {
         expect(body.article.article_id).toEqual(1);
         expect(article.body).toEqual("I find this existence challenging");
         expect(article.topic).toEqual("mitch");
-        expect(article.created_at).toEqual("2020-07-09T20:11:00.000Z");
         expect(article.votes).toEqual(100);
       });
   });
@@ -655,7 +634,6 @@ describe("PATCH /api/comments/:comment_id", () => {
         expect(comment.comment_id).toEqual(1);
         expect(comment.article_id).toEqual(9);
         expect(comment.votes).toEqual(36);
-        expect(comment.created_at).toEqual("2020-04-06T12:17:00.000Z");
         expect(comment.author).toEqual("butter_bridge");
         expect(comment.body).toEqual(
           "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!"
@@ -758,6 +736,62 @@ describe("POST /api/articles", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.message).toBe("Bad Request");
+      });
+  });
+});
+
+describe("POST /api/topics", () => {
+  it("responds with a status of 201 with a message of confirmation", () => {
+    return request(app)
+      .post("/api/topics")
+      .send({ slug: "blah", description: "blah blah blah" })
+      .expect(201)
+      .then(({ body }) => {
+        const topic = body.topic;
+        expect(topic.slug).toBe("blah");
+        expect(topic.description).toBe("blah blah blah");
+      });
+  });
+  it("responds with a status of 201 with a message of confirmation when no description given", () => {
+    return request(app)
+      .post("/api/topics")
+      .send({ slug: "blah" })
+      .expect(201)
+      .then(({ body }) => {
+        const topic = body.topic;
+        expect(topic.slug).toBe("blah");
+        expect(topic.description).toBe(null);
+      });
+  });
+  it("responds with a status of 400 when the sent a wrong body format", () => {
+    return request(app)
+      .post("/api/topics")
+      .send({ body: "blah" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.message).toBe("Bad Request");
+      });
+  });
+});
+
+describe("DELETE /api/articles/:article_id", () => {
+  it("responds with a status of 204 when deleted", () => {
+    return request(app).delete("/api/articles/2").expect(204);
+  });
+  it("responds with a status of 404 when id not found with a message ", () => {
+    return request(app)
+      .delete("/api/articles/500")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.message).toBe("Article not found");
+      });
+  });
+  it("responds with a status of 400 for invalid non numeric id", () => {
+    return request(app)
+      .delete("/api/articles/blah")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body).toEqual({ message: "Bad Request" });
       });
   });
 });

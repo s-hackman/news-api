@@ -10,6 +10,8 @@ const {
   fetchUserByUsername,
   updateCommentVotes,
   addArticle,
+  addTopic,
+  removeArticle,
 } = require("../models/index");
 
 const endpoints = require("../../endpoints.json");
@@ -143,6 +145,24 @@ exports.postArticle = (req, res, next) => {
       const article = rows[0];
       article.comment_count = 0;
       res.status(201).send({ article });
+    })
+    .catch(next);
+};
+
+exports.postTopic = (req, res, next) => {
+  const { slug, description } = req.body;
+  addTopic(slug, description)
+    .then((topic) => {
+      res.status(201).send({ topic });
+    })
+    .catch(next);
+};
+
+exports.deleteArticle = (req, res, next) => {
+  const { article_id } = req.params;
+  removeArticle(article_id)
+    .then(() => {
+      res.status(204).send();
     })
     .catch(next);
 };
