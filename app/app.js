@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const {
   badPath,
   handleCustomErrors,
@@ -7,6 +8,7 @@ const {
   handlePsqlErrors,
 } = require("./errors/index");
 const apiRouter = require("./router/apiRouter");
+app.use(cors());
 app.use(express.json());
 
 const port = 9090;
