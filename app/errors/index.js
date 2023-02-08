@@ -19,6 +19,8 @@ exports.handlePsqlErrors = (err, req, res, next) => {
     err.code === "23503"
   ) {
     res.status(400).send({ message: "Bad Request" });
+  } else if (err.code === "23505") {
+    res.status(400).send({ message: "Topic already Exists" });
   } else {
     next(err);
   }
